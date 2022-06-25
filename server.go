@@ -14,21 +14,9 @@ var (
 func main() {
 	server := gin.Default()
 
-	server.GET("/api", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"messege": "Hello User",
-		})
-	})
-
-	server.GET("/finduser", func(ctx *gin.Context) {
-		ctx.JSON(200, userController.FindAll())
-	})
-	server.GET("/finduser/:id", func(ctx *gin.Context) {
-		ctx.JSON(200, userController.FindById(ctx))
-	})
-	server.POST("/createuser", func(ctx *gin.Context) {
-		ctx.JSON(200, userController.Save(ctx))
-	})
+	server.GET("/finduser", userController.FindAll)
+	server.GET("/finduser/:id", userController.FindById)
+	server.POST("/createuser", userController.Save)
 
 	server.Run(":8009")
 }

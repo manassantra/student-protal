@@ -1,6 +1,7 @@
 package service
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -8,9 +9,9 @@ import (
 )
 
 type UserService interface {
-	Save(entity.UserEntity) entity.UserEntity
-	FindAll() []entity.UserEntity
-	FindById(*gin.Context) any
+	Save(*gin.Context)
+	FindAll(*gin.Context)
+	FindById(*gin.Context)
 	// UpdateById() entity.UserEntity
 	// DeleteById(*entity.UserEntity) entity.UserEntity
 }
@@ -23,24 +24,30 @@ func New() UserService {
 	return &userService{}
 }
 
-func (service *userService) Save(user entity.UserEntity) entity.UserEntity {
+func (service *userService) Save(c *gin.Context) {
+	var user entity.UserEntity
+	if err := c.BindJSON(&user); err != nil {
+		return
+	}
 	service.users = append(service.users, user)
-	return user
+	c.IndentedJSON(http.StatusCreated, user)
+	//return user
 }
 
-func (service *userService) FindAll() []entity.UserEntity {
-	return service.users
+func (service *userService) FindAll(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, service.users)
 }
 
-func (service *userService) FindById(c *gin.Context) any {
+func (service *userService) FindById(c *gin.Context) {
 	//ID:= c.Param(`id`)
-	error := "User Not Exist"
+	//error := "User Not Exist"
 	Id, _ := strconv.ParseInt(c.Param(`id`), 10, 64)
 	for _, v := range service.users {
 		if Id == v.Id {
-			return v
+			c.IndentedJSON(http.StatusOK, v)
+			return
 		}
 	}
-	return error
-	// c.IndentedJSON(209, gin.H{"error": "No User Exist"})
+	//return error
+	c.IndentedJSON(209, gin.H{"error": "No User Exist"})
 }
