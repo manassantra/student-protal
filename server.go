@@ -1,22 +1,40 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
+
 	"github.com/gin-gonic/gin"
-	"manassantra.online/golang-proj/student-portal/controller"
-	"manassantra.online/golang-proj/student-portal/service"
+	_ "github.com/lib/pq"
 )
 
-var (
-	userService    service.UserService       = service.New()
-	userController controller.UserController = controller.New(userService)
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "golang"
+	password = "golang"
+	dbname   = "postgres"
 )
 
 func main() {
-	server := gin.Default()
 
-	server.GET("/finduser", userController.FindAll)
-	server.GET("/finduser/:id", userController.FindById)
-	server.POST("/createuser", userController.Save)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("DB Successfully connected!")
+
+	server := gin.Default()
 
 	server.Run(":8009")
 }
